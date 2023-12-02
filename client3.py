@@ -32,6 +32,17 @@ N = 500
 def getDataPoint(quote):
     """ Produce all the needed values to generate a datapoint """
     """ ------------- Update this function ------------- """
+    keys = ('top_ask', 'timestamp', 'top_bid', 'id', 'stock')
+    for key in keys:
+        if key not in quote:
+            raise Exception("key not in quote")
+    if ('price' not in quote['top_ask'] or 'price' not in quote['top_bid'] or
+            'size' not in quote['top_ask'] or 'size' not in quote['top_bid']):
+        raise Exception("price not in quote")
+    if quote['top_ask']['price'] <= 0 or quote['top_bid']['price'] <= 0:
+        raise Exception("price is not positive")
+    if quote['top_ask']['size'] < 0 or quote['top_bid']['size'] < 0:
+        raise Exception("size is negative")
     stock = quote['stock']
     bid_price = float(quote['top_bid']['price'])
     ask_price = float(quote['top_ask']['price'])
@@ -42,8 +53,8 @@ def getDataPoint(quote):
 def getRatio(price_a, price_b):
     """ Get ratio of price_a and price_b """
     """ ------------- Update this function ------------- """
-    if (price_b == 0):
-        return
+    if (price_b <= 0) or (price_a <= 0):
+        raise Exception("price is not positive")
     return price_a / price_b
 
 
@@ -56,7 +67,11 @@ if __name__ == "__main__":
         """ ----------- Update to get the ratio --------------- """
         prices = {}
         for quote in quotes:
-            stock, bid_price, ask_price, price = getDataPoint(quote)
+            try:
+                stock, bid_price, ask_price, price = getDataPoint(quote)
+            except Exception as e:
+                print(e)
+                continue
             prices[stock] = price
             print("Quoted %s at (bid:%s, ask:%s, price:%s)" % (stock, bid_price, ask_price, price))
 
